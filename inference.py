@@ -10,6 +10,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
+import os
 
 from model import SODModel
 from dataloader import InfDataloader, SODLoader
@@ -18,7 +19,7 @@ from dataloader import InfDataloader, SODLoader
 def parse_arguments():
     parser = argparse.ArgumentParser(description='Parameters to train your model.')
     parser.add_argument('--imgs_folder', default='./data/DUTS/DUTS-TE/DUTS-TE-Image', help='Path to folder containing images', type=str)
-    parser.add_argument('--model_path', default='/home/tarasha/Projects/sairajk/saliency/SOD_2/models/0.7_wbce_w0-1_w1-1.12/best_epoch-138_acc-0.9107_loss-0.1300.pt', help='Path to model', type=str)
+    parser.add_argument('--model_path', default='./models/alph-0.7_wbce_w0-1.0_w1-1.15/' + os.listdir('./models/alph-0.7_wbce_w0-1.0_w1-1.15/')[-1], help='Path to model', type=str)
     parser.add_argument('--use_gpu', default=True, help='Whether to use GPU or not', type=bool)
     parser.add_argument('--img_size', default=256, help='Image size to be used', type=int)
     parser.add_argument('--bs', default=24, help='Batch Size for testing', type=int)

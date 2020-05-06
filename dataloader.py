@@ -17,12 +17,18 @@ def pad_resize_image(inp_img, out_img=None, target_size=None):
     Function to pad and resize images to a given size.
     out_img is None only during inference. During training and testing
     out_img is NOT None.
-    :param inp_img: A H x W x C input image.
+    :param inp_img: A H x W x C (or H x W mask) input image.
     :param out_img: A H x W input image of mask.
     :param target_size: The size of the final images.
     :return: Re-sized inp_img and out_img
     """
-    h, w, c = inp_img.shape
+    h = 0
+    w = 0
+    c = 0
+    try:
+        h, w, c = inp_img.shape
+    except:
+        h, w = inp_img.shape
     size = max(h, w)
 
     padding_h = (size - h) // 2
@@ -183,6 +189,24 @@ class SODLoader(Dataset):
     def __len__(self):
         return len(self.inp_files)
 
+class EvalDataLoader(Dataset):
+    """
+    Wrapper class for InfDataloader
+    Use as a dataloader for running evaluation functions based on prediction result and ground truth
+    """
+    def __init__(self, img_folder, gt_path, target_size=256):
+        self.inf_dataloader = InfDataloader(img_folder, target_size=target_size)
+        self.out_files = sorted(glob.glob(gt_path + '/*'))
+        self.target_size = target_size
+
+    def __getitem__(self, idx):
+        img_np, img_tor = self.inf_dataloader.__getitem__(idx)
+        mask_img = cv2.imread(self.out_files[idx], 0)
+        mask_img = pad_resize_image(mask_img, None, self.target_size)
+        return img_np, img_tor, mask_img
+
+    def __len__(self):
+        return self.inf_dataloader.__len__()
 
 class InfDataloader(Dataset):
     """
