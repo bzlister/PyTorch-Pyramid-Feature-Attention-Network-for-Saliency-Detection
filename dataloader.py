@@ -243,6 +243,46 @@ class InfDataloader(Dataset):
     def __len__(self):
         return len(self.img_paths)
 
+class InfDataloader2(Dataset):
+    """
+    Dataloader for Inference.
+    """
+    def __init__(self, video_path, target_size=256):
+        self.video_path = video_path
+        cap = cv2.VideoCapture(video_path)
+        self.frames = []
+        while(cap.isOpened()):
+            ret, frame = cap.read()
+            if ret == False:
+                break
+            self.frames.append(frame)
+
+        self.target_size = target_size
+        self.normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                              std=[0.229, 0.224, 0.225])
+
+    def __getitem__(self, idx):
+        """
+        __getitem__ for inference
+        :param idx: Index of the image
+        :return: img_np is a numpy RGB-image of shape H x W x C with pixel values in range 0-255.
+        And img_tor is a torch tensor, RGB, C x H x W in shape and normalized.
+        """
+        img = self.frames[idx]
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+        # Pad images to target size
+        img_np = pad_resize_image(img, None, self.target_size)
+        img_tor = img_np.astype(np.float32)
+        img_tor = img_tor / 255.0
+        img_tor = np.transpose(img_tor, axes=(2, 0, 1))
+        img_tor = torch.from_numpy(img_tor).float()
+        img_tor = self.normalize(img_tor)
+
+        return img_np, img_tor
+
+    def __len__(self):
+        return len(self.frames)
 
 if __name__ == '__main__':
     # Test Dataloader

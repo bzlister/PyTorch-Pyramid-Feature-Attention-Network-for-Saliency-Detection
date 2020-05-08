@@ -66,8 +66,10 @@ class Engine:
 
         if torch.cuda.is_available():
             self.device = torch.device(device='cuda')
+            print("We are using the GPU")
         else:
             self.device = torch.device(device='cpu')
+            print("We are using the CPU")
 
         self.model = SODModel()
         self.model.to(self.device)
